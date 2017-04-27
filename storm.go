@@ -167,6 +167,15 @@ func (s *DB) Save(data interface{}) error {
 	return s.root.Save(data)
 }
 
+// SaveWithConfig saves the given data based on the given StructConfig.
+//
+// This serves to save any data structure manually, and should only be
+// done if the data structure being saved cannot be indexed by normal Storm
+// methods.
+func (s *DB) SaveWithConfig(data interface{}, cfg *StructConfig) error {
+	return s.root.SaveWithConfig(data, cfg)
+}
+
 // PrefixScan scans the root buckets for keys matching the given prefix.
 func (s *DB) PrefixScan(prefix string) []Node {
 	return s.root.PrefixScan(prefix)

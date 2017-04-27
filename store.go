@@ -2,6 +2,7 @@ package storm
 
 import (
 	"bytes"
+	"fmt"
 	"reflect"
 
 	"github.com/asdine/storm/index"
@@ -151,12 +152,31 @@ func (n *node) Save(data interface{}) error {
 		return err
 	}
 
+	fmt.Println("config name:", cfg.Name)
+	fmt.Println("config id:", cfg.ID)
+	for k, f := range cfg.Fields {
+		fmt.Println("field key:", k)
+		fmt.Println("field name:", f.Name)
+		fmt.Println("field index:", f.Index)
+	}
+
 	if cfg.ID.IsZero {
 		if !cfg.ID.IsInteger || (!n.s.autoIncrement && !cfg.ID.Increment) {
 			return ErrZeroID
 		}
 	}
 
+	return n.readWriteTx(func(tx *bolt.Tx) error {
+		return n.save(tx, cfg, data, true)
+	})
+}
+
+// SaveWithConfig saves the given data based on the given StructConfig.
+//
+// This serves to save any data structure manually, and should only be
+// done if the data structure being saved cannot be indexed by normal Storm
+// methods.
+func (n *node) SaveWithConfig(data interface{}, cfg *StructConfig) error {
 	return n.readWriteTx(func(tx *bolt.Tx) error {
 		return n.save(tx, cfg, data, true)
 	})

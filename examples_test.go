@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 
@@ -56,6 +57,97 @@ func ExampleDB_Save() {
 
 	// Output:
 	// 1
+	// already exists
+}
+
+func ExampleDB_MapSupport_Save() {
+	dir, _ := ioutil.TempDir(os.TempDir(), "storm")
+	defer os.RemoveAll(dir)
+
+	// Open takes an optional list of options as the last argument.
+	// AutoIncrement will auto-increment integer IDs without existing values.
+	db, _ := storm.Open(filepath.Join(dir, "storm.db"), storm.AutoIncrement())
+	defer db.Close()
+
+	user := map[string]interface{}{
+		// NOTE: Autoincrementing is not working in this hacked implementation of
+		// StructField. So a manual value is being assigned here.
+		"ID":        7,
+		"Group":     "staff",
+		"Email":     "john@provider.com",
+		"Name":      "John",
+		"Age":       21,
+		"CreatedAt": time.Now(),
+	}
+
+	// makePtr helps create a reflect pointer for the given interface
+	makePtr := func(v interface{}) *reflect.Value {
+		r := reflect.ValueOf(v)
+		return &r
+	}
+
+	// NOTE: Autoincrementing is not working in this hacked implementation of
+	// StructField.
+	//
+	// So we're not using IsZero:true, which causes the field to be incremented/set.
+	idField := storm.FieldConfig{
+		Name:  "ID",
+		IsID:  true,
+		Value: makePtr(user["ID"]),
+	}
+	cfg := storm.StructConfig{
+		Name: "User",
+		Fields: map[string]*storm.FieldConfig{
+			"ID": &idField,
+			"Group": {
+				Name:  "Group",
+				Index: "index",
+				Value: makePtr(user["Group"]),
+			},
+			"Email": {
+				Name:  "Email",
+				Index: "unique",
+				Value: makePtr(user["Email"]),
+			},
+			"Age": {
+				Name:      "Age",
+				Index:     "index",
+				IsInteger: true,
+				Value:     makePtr(user["Age"]),
+			},
+			"CreatedAt": {
+				Name:  "CreatedAt",
+				Index: "index",
+				Value: makePtr(user["CreatedAt"]),
+			},
+		},
+		ID: &idField,
+	}
+
+	err := db.SaveWithConfig(&user, &cfg)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(user["ID"])
+
+	user2 := map[string]interface{}{}
+	for k, v := range user {
+		user2[k] = v
+	}
+	user2["ID"] = 0
+
+	// Save will fail because of the unique constraint on Email
+	err = db.SaveWithConfig(&user2, &cfg)
+	fmt.Println(err)
+
+	var usersAll map[string]interface{}
+	err = db.All(&usersAll)
+	fmt.Println(err)
+
+	// Output:
+	// 7
 	// already exists
 }
 
