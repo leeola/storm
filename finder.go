@@ -84,7 +84,7 @@ func (n *node) One(fieldName string, value interface{}, to interface{}) error {
 	})
 }
 
-func (n *node) one(tx *bolt.Tx, bucketName, fieldName string, cfg *structConfig, to interface{}, val []byte, skipIndex bool) error {
+func (n *node) one(tx *bolt.Tx, bucketName, fieldName string, cfg *StructConfig, to interface{}, val []byte, skipIndex bool) error {
 	bucket := n.GetBucket(tx, bucketName)
 	if bucket == nil {
 		return ErrNotFound
@@ -170,7 +170,7 @@ func (n *node) Find(fieldName string, value interface{}, to interface{}, options
 	})
 }
 
-func (n *node) find(tx *bolt.Tx, bucketName, fieldName string, cfg *structConfig, sink *listSink, val []byte, opts *index.Options) error {
+func (n *node) find(tx *bolt.Tx, bucketName, fieldName string, cfg *StructConfig, sink *listSink, val []byte, opts *index.Options) error {
 	bucket := n.GetBucket(tx, bucketName)
 	if bucket == nil {
 		return ErrNotFound
@@ -247,7 +247,7 @@ func (n *node) AllByIndex(fieldName string, to interface{}, options ...func(*ind
 	})
 }
 
-func (n *node) allByIndex(tx *bolt.Tx, fieldName string, cfg *structConfig, ref *reflect.Value, opts *index.Options) error {
+func (n *node) allByIndex(tx *bolt.Tx, fieldName string, cfg *StructConfig, ref *reflect.Value, opts *index.Options) error {
 	bucket := n.GetBucket(tx, cfg.Name)
 	if bucket == nil {
 		return ErrNotFound
@@ -374,7 +374,7 @@ func (n *node) Range(fieldName string, min, max, to interface{}, options ...func
 	})
 }
 
-func (n *node) rnge(tx *bolt.Tx, bucketName, fieldName string, cfg *structConfig, sink *listSink, min, max []byte, opts *index.Options) error {
+func (n *node) rnge(tx *bolt.Tx, bucketName, fieldName string, cfg *StructConfig, sink *listSink, min, max []byte, opts *index.Options) error {
 	bucket := n.GetBucket(tx, bucketName)
 	if bucket == nil {
 		reflect.Indirect(sink.ref).SetLen(0)

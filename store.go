@@ -51,7 +51,7 @@ func (n *node) Init(data interface{}) error {
 	})
 }
 
-func (n *node) init(tx *bolt.Tx, cfg *structConfig) error {
+func (n *node) init(tx *bolt.Tx, cfg *StructConfig) error {
 	bucket, err := n.CreateBucketIfNotExists(tx, cfg.Name)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (n *node) ReIndex(data interface{}) error {
 	})
 }
 
-func (n *node) reIndex(tx *bolt.Tx, data interface{}, cfg *structConfig) error {
+func (n *node) reIndex(tx *bolt.Tx, data interface{}, cfg *StructConfig) error {
 	root := n.WithTransaction(tx)
 	nodes := root.From(cfg.Name).PrefixScan(indexPrefix)
 	bucket := root.GetBucket(tx, cfg.Name)
@@ -162,7 +162,7 @@ func (n *node) Save(data interface{}) error {
 	})
 }
 
-func (n *node) save(tx *bolt.Tx, cfg *structConfig, data interface{}, edit bool) error {
+func (n *node) save(tx *bolt.Tx, cfg *StructConfig, data interface{}, edit bool) error {
 	bucket, err := n.CreateBucketIfNotExists(tx, cfg.Name)
 	if err != nil {
 		return err
@@ -256,7 +256,7 @@ func (n *node) save(tx *bolt.Tx, cfg *structConfig, data interface{}, edit bool)
 
 // Update a structure
 func (n *node) Update(data interface{}) error {
-	return n.update(data, func(ref *reflect.Value, current *reflect.Value, cfg *structConfig) error {
+	return n.update(data, func(ref *reflect.Value, current *reflect.Value, cfg *StructConfig) error {
 		numfield := ref.NumField()
 		for i := 0; i < numfield; i++ {
 			f := ref.Field(i)
@@ -280,7 +280,7 @@ func (n *node) Update(data interface{}) error {
 
 // UpdateField updates a single field
 func (n *node) UpdateField(data interface{}, fieldName string, value interface{}) error {
-	return n.update(data, func(ref *reflect.Value, current *reflect.Value, cfg *structConfig) error {
+	return n.update(data, func(ref *reflect.Value, current *reflect.Value, cfg *StructConfig) error {
 		f := current.FieldByName(fieldName)
 		if !f.IsValid() {
 			return ErrNotFound
@@ -303,7 +303,7 @@ func (n *node) UpdateField(data interface{}, fieldName string, value interface{}
 	})
 }
 
-func (n *node) update(data interface{}, fn func(*reflect.Value, *reflect.Value, *structConfig) error) error {
+func (n *node) update(data interface{}, fn func(*reflect.Value, *reflect.Value, *StructConfig) error) error {
 	ref := reflect.ValueOf(data)
 
 	if !ref.IsValid() || ref.Kind() != reflect.Ptr || ref.Elem().Kind() != reflect.Struct {
@@ -391,7 +391,7 @@ func (n *node) DeleteStruct(data interface{}) error {
 	})
 }
 
-func (n *node) deleteStruct(tx *bolt.Tx, cfg *structConfig, id []byte) error {
+func (n *node) deleteStruct(tx *bolt.Tx, cfg *StructConfig, id []byte) error {
 	bucket := n.GetBucket(tx, cfg.Name)
 	if bucket == nil {
 		return ErrNotFound

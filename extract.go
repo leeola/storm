@@ -31,14 +31,14 @@ type FieldConfig struct {
 	Value          *reflect.Value
 }
 
-// structConfig is a structure gathering all the relevant informations about a model
-type structConfig struct {
+// StructConfig is a structure gathering all the relevant informations about a model
+type StructConfig struct {
 	Name   string
 	Fields map[string]*FieldConfig
 	ID     *FieldConfig
 }
 
-func extract(s *reflect.Value, mi ...*structConfig) (*structConfig, error) {
+func extract(s *reflect.Value, mi ...*StructConfig) (*StructConfig, error) {
 	if s.Kind() == reflect.Ptr {
 		e := s.Elem()
 		s = &e
@@ -51,12 +51,12 @@ func extract(s *reflect.Value, mi ...*structConfig) (*structConfig, error) {
 
 	var child bool
 
-	var m *structConfig
+	var m *StructConfig
 	if len(mi) > 0 {
 		m = mi[0]
 		child = true
 	} else {
-		m = &structConfig{}
+		m = &StructConfig{}
 		m.Fields = make(map[string]*FieldConfig)
 	}
 
@@ -94,7 +94,7 @@ func extract(s *reflect.Value, mi ...*structConfig) (*structConfig, error) {
 	return m, nil
 }
 
-func extractField(value *reflect.Value, field *reflect.StructField, m *structConfig, isChild bool) error {
+func extractField(value *reflect.Value, field *reflect.StructField, m *StructConfig, isChild bool) error {
 	var f *FieldConfig
 	var err error
 
@@ -177,8 +177,8 @@ func extractField(value *reflect.Value, field *reflect.StructField, m *structCon
 	return nil
 }
 
-func extractSingleField(ref *reflect.Value, fieldName string) (*structConfig, error) {
-	var cfg structConfig
+func extractSingleField(ref *reflect.Value, fieldName string) (*StructConfig, error) {
+	var cfg StructConfig
 	cfg.Fields = make(map[string]*FieldConfig)
 
 	f, ok := ref.Type().FieldByName(fieldName)
