@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func allByType(m *structConfig, indexType string) []*fieldConfig {
-	var idx []*fieldConfig
+func allByType(m *structConfig, indexType string) []*FieldConfig {
+	var idx []*FieldConfig
 	for k := range m.Fields {
 		if m.Fields[k].Index == indexType {
 			idx = append(idx, m.Fields[k])

@@ -40,7 +40,7 @@ type meta struct {
 	bucket *bolt.Bucket
 }
 
-func (m *meta) increment(field *fieldConfig) error {
+func (m *meta) increment(field *FieldConfig) error {
 	var err error
 	counter := field.IncrementStart
 

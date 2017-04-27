@@ -20,7 +20,7 @@ const (
 	indexPrefix  = "__storm_index_"
 )
 
-type fieldConfig struct {
+type FieldConfig struct {
 	Name           string
 	Index          string
 	IsZero         bool
@@ -34,8 +34,8 @@ type fieldConfig struct {
 // structConfig is a structure gathering all the relevant informations about a model
 type structConfig struct {
 	Name   string
-	Fields map[string]*fieldConfig
-	ID     *fieldConfig
+	Fields map[string]*FieldConfig
+	ID     *FieldConfig
 }
 
 func extract(s *reflect.Value, mi ...*structConfig) (*structConfig, error) {
@@ -57,7 +57,7 @@ func extract(s *reflect.Value, mi ...*structConfig) (*structConfig, error) {
 		child = true
 	} else {
 		m = &structConfig{}
-		m.Fields = make(map[string]*fieldConfig)
+		m.Fields = make(map[string]*FieldConfig)
 	}
 
 	if m.Name == "" {
@@ -95,12 +95,12 @@ func extract(s *reflect.Value, mi ...*structConfig) (*structConfig, error) {
 }
 
 func extractField(value *reflect.Value, field *reflect.StructField, m *structConfig, isChild bool) error {
-	var f *fieldConfig
+	var f *FieldConfig
 	var err error
 
 	tag := field.Tag.Get("storm")
 	if tag != "" {
-		f = &fieldConfig{
+		f = &FieldConfig{
 			Name:           field.Name,
 			IsZero:         isZero(value),
 			IsInteger:      isInteger(value),
@@ -161,7 +161,7 @@ func extractField(value *reflect.Value, field *reflect.StructField, m *structCon
 	// the field is named ID and no ID field has been detected before
 	if m.ID == nil && field.Name == "ID" {
 		if f == nil {
-			f = &fieldConfig{
+			f = &FieldConfig{
 				Name:           field.Name,
 				IsZero:         isZero(value),
 				IsInteger:      isInteger(value),
@@ -179,7 +179,7 @@ func extractField(value *reflect.Value, field *reflect.StructField, m *structCon
 
 func extractSingleField(ref *reflect.Value, fieldName string) (*structConfig, error) {
 	var cfg structConfig
-	cfg.Fields = make(map[string]*fieldConfig)
+	cfg.Fields = make(map[string]*FieldConfig)
 
 	f, ok := ref.Type().FieldByName(fieldName)
 	if !ok || f.PkgPath != "" {
